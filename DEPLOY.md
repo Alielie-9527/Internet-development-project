@@ -346,17 +346,6 @@ docker-compose logs > logs.txt
    sudo ufw allow 3306/tcp  # MySQL（仅内部）
    ```
 
-4. **定期备份数据**
-   ```bash
-   # 每天凌晨 2 点备份
-   0 2 * * * docker exec health-agent-mysql mysqldump -uroot -proot nutrition_db > /backups/backup-$(date +\%Y\%m\%d).sql
-   ```
-
-## 📞 支持和反馈
-
-- 📧 Email: your-email@example.com
-- 🐛 Issue: GitHub Issues
-- 💬 Discussion: GitHub Discussions
 
 ## 📄 许可证
 
