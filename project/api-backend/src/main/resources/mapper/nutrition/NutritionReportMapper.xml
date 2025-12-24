@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.health.agent.module.nutrition.mapper.NutritionReportMapper">
+
+    <resultMap id="BaseResultMap" type="com.health.agent.module.nutrition.entity.NutritionReport">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="report_date" property="reportDate"/>
+        <result column="report_type" property="reportType"/>
+        <result column="total_calories" property="totalCalories"/>
+        <result column="total_protein" property="totalProtein"/>
+        <result column="total_carbohydrate" property="totalCarbohydrate"/>
+        <result column="total_fat" property="totalFat"/>
+        <result column="calories_burned" property="caloriesBurned"/>
+        <result column="net_calories" property="netCalories"/>
+        <result column="goal_completion_rate" property="goalCompletionRate"/>
+        <result column="nutrition_balance_score" property="nutritionBalanceScore"/>
+        <result column="ai_advice" property="aiAdvice"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.health.agent.module.nutrition.entity.NutritionReport" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO nutrition_report (
+            user_id, report_date, report_type,
+            total_calories, total_protein, total_carbohydrate, total_fat,
+            calories_burned, net_calories, goal_completion_rate, nutrition_balance_score,
+            ai_advice, created_at
+        ) VALUES (
+            #{userId}, #{reportDate}, #{reportType},
+            #{totalCalories}, #{totalProtein}, #{totalCarbohydrate}, #{totalFat},
+            #{caloriesBurned}, #{netCalories}, #{goalCompletionRate}, #{nutritionBalanceScore},
+            #{aiAdvice}, #{createdAt}
+        )
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM nutrition_report WHERE id = #{id}
+    </select>
+
+    <update id="updateById" parameterType="com.health.agent.module.nutrition.entity.NutritionReport">
+        UPDATE nutrition_report
+        <set>
+            <if test="totalCalories != null">total_calories = #{totalCalories},</if>
+            <if test="totalProtein != null">total_protein = #{totalProtein},</if>
+            <if test="totalCarbohydrate != null">total_carbohydrate = #{totalCarbohydrate},</if>
+            <if test="totalFat != null">total_fat = #{totalFat},</if>
+            <if test="caloriesBurned != null">calories_burned = #{caloriesBurned},</if>
+            <if test="netCalories != null">net_calories = #{netCalories},</if>
+            <if test="goalCompletionRate != null">goal_completion_rate = #{goalCompletionRate},</if>
+            <if test="nutritionBalanceScore != null">nutrition_balance_score = #{nutritionBalanceScore},</if>
+            <if test="aiAdvice != null">ai_advice = #{aiAdvice},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM nutrition_report WHERE id = #{id}
+    </delete>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM nutrition_report WHERE user_id = #{userId}
+        <if test="query.reportType != null and query.reportType != ''">
+            AND report_type = #{query.reportType}
+        </if>
+        <if test="query.reportPeriod != null and query.reportPeriod != ''">
+            AND report_type = #{query.reportPeriod}
+        </if>
+        <if test="query.startDate != null">
+            AND report_date &gt;= #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND report_date &lt;= #{query.endDate}
+        </if>
+        ORDER BY report_date DESC, id DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{(query.pageNum-1) * query.pageSize}
+        </if>
+        <if test="query.page != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{(query.page-1) * query.pageSize}
+        </if>
+    </select>
+
+    <select id="selectByUserDateType" resultMap="BaseResultMap">
+        SELECT * FROM nutrition_report WHERE user_id = #{userId} AND report_date = #{reportDate} AND report_type = #{reportType} LIMIT 1
+    </select>
+
+    <select id="selectByDateRange" resultMap="BaseResultMap">
+        SELECT * FROM nutrition_report WHERE user_id = #{userId} AND report_date BETWEEN #{startDate} AND #{endDate} ORDER BY report_date ASC
+    </select>
+
+</mapper>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.health.agent.module.diet.mapper.DietDiaryMapper">
+
+    <resultMap id="BaseResultMap" type="com.health.agent.module.diet.entity.DietDiary">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="food_id" property="foodId"/>
+        <result column="meal_type" property="mealType"/>
+        <result column="meal_time" property="mealTime"/>
+        <result column="amount" property="amount"/>
+        <result column="unit" property="unit"/>
+        <result column="calories" property="calories"/>
+        <result column="protein" property="protein"/>
+        <result column="carbohydrate" property="carbohydrate"/>
+        <result column="fat" property="fat"/>
+        <result column="notes" property="notes"/>
+        <result column="image_url" property="imageUrl"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="VOResultMap" type="com.health.agent.module.diet.vo.DietDiaryVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="food_id" property="foodId"/>
+        <result column="food_name" property="foodName"/>
+        <result column="food_category" property="foodCategory"/>
+        <result column="meal_type" property="mealType"/>
+        <result column="meal_time" property="mealTime"/>
+        <result column="amount" property="amount"/>
+        <result column="unit" property="unit"/>
+        <result column="calories" property="calories"/>
+        <result column="protein" property="protein"/>
+        <result column="carbohydrate" property="carbohydrate"/>
+        <result column="fat" property="fat"/>
+        <result column="notes" property="notes"/>
+        <result column="image_url" property="imageUrl"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 插入饮食日记 -->
+    <insert id="insert" parameterType="com.health.agent.module.diet.entity.DietDiary" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO diet_diary (
+            user_id, date, meal_type, meal_time, food_id, food_name, amount, unit,
+            calories, protein, carbohydrate, fat, notes, image_url,
+            created_at, updated_at
+        ) VALUES (
+            #{userId}, DATE(#{mealTime}), #{mealType}, #{mealTime}, #{foodId}, #{foodName}, #{amount}, #{unit},
+            #{calories}, #{protein}, #{carbohydrate}, #{fat}, #{notes}, #{imageUrl},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM diet_diary WHERE id = #{id}
+    </select>
+
+    <!-- 根据ID查询VO -->
+    <select id="selectVOById" resultMap="VOResultMap">
+        SELECT 
+            dd.*,
+            f.name AS food_name,
+            f.category AS food_category
+        FROM diet_diary dd
+        LEFT JOIN food f ON dd.food_id = f.id
+        WHERE dd.id = #{id}
+    </select>
+
+    <!-- 更新饮食日记 -->
+    <update id="updateById" parameterType="com.health.agent.module.diet.entity.DietDiary">
+        UPDATE diet_diary
+        <set>
+            <if test="foodId != null">food_id = #{foodId},</if>
+            <if test="mealType != null">meal_type = #{mealType},</if>
+            <if test="mealTime != null">date = DATE(#{mealTime}), meal_time = #{mealTime},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="calories != null">calories = #{calories},</if>
+            <if test="protein != null">protein = #{protein},</if>
+            <if test="carbohydrate != null">carbohydrate = #{carbohydrate},</if>
+            <if test="fat != null">fat = #{fat},</if>
+            <if test="notes != null">notes = #{notes},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            updated_at = #{updatedAt}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除 -->
+    <delete id="deleteById">
+        DELETE FROM diet_diary WHERE id = #{id}
+    </delete>
+
+    <!-- 条件查询列表 -->
+    <select id="selectList" resultMap="VOResultMap">
+        SELECT 
+            dd.*,
+            f.name AS food_name,
+            f.category AS food_category
+        FROM diet_diary dd
+        LEFT JOIN food f ON dd.food_id = f.id
+        WHERE dd.user_id = #{userId}
+        <if test="query.mealType != null and query.mealType != ''">
+            AND dd.meal_type = #{query.mealType}
+        </if>
+        <if test="query.startDate != null">
+            AND DATE(dd.meal_time) &gt;= #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND DATE(dd.meal_time) &lt;= #{query.endDate}
+        </if>
+        <if test="query.foodId != null">
+            AND dd.food_id = #{query.foodId}
+        </if>
+        ORDER BY dd.meal_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{query.pageNum}
+        </if>
+    </select>
+
+    <!-- 查询用户某日期的饮食记录 -->
+    <select id="selectByUserAndDate" resultMap="VOResultMap">
+        SELECT 
+            dd.*,
+            f.name AS food_name,
+            f.category AS food_category
+        FROM diet_diary dd
+        LEFT JOIN food f ON dd.food_id = f.id
+        WHERE dd.user_id = #{userId}
+        AND DATE(dd.meal_time) = #{date}
+        ORDER BY dd.meal_time ASC
+    </select>
+
+    <!-- 查询用户日期范围内的饮食记录 -->
+    <select id="selectByUserAndDateRange" resultMap="VOResultMap">
+        SELECT 
+            dd.*,
+            f.name AS food_name,
+            f.category AS food_category
+        FROM diet_diary dd
+        LEFT JOIN food f ON dd.food_id = f.id
+        WHERE dd.user_id = #{userId}
+        AND DATE(dd.meal_time) BETWEEN #{startDate} AND #{endDate}
+        ORDER BY dd.meal_time DESC
+    </select>
+
+    <!-- 统计用户某日期的营养摄入 -->
+    <select id="sumNutritionByDate" resultMap="VOResultMap">
+        SELECT 
+            SUM(calories) AS calories,
+            SUM(protein) AS protein,
+            SUM(carbohydrate) AS carbohydrate,
+            SUM(fat) AS fat
+        FROM diet_diary
+        WHERE user_id = #{userId}
+        AND DATE(meal_time) = #{date}
+    </select>
+
+</mapper>

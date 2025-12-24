@@ -1,0 +1,41 @@
+# ==================== 前端 .dockerignore ====================
+# 避免将不必要的文件复制到 Docker 镜像中，加快构建速度和减少镜像大小
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node 模块（会在 Docker 内重新安装）
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编译输出（会在 Docker 内重新编译）
+dist/
+.turbo/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# 文档和配置
+*.md
+!README.md
+.env
+.env.local
+.env.*.local
+
+# 测试
+__tests__/
+coverage/
+
+# 其他
+*.tmp
+*.bak
+.DS_Store

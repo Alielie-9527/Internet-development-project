@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.health.agent.module.food.mapper.FoodMapper">
+
+    <resultMap id="BaseResultMap" type="com.health.agent.module.food.entity.Food">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="category" property="category"/>
+        <result column="brand" property="brand"/>
+        <result column="barcode" property="barcode"/>
+        <result column="unit" property="unit"/>
+        <result column="serving_size" property="servingSize"/>
+        <result column="calories" property="calories"/>
+        <result column="protein" property="protein"/>
+        <result column="carbohydrate" property="carbohydrate"/>
+        <result column="fat" property="fat"/>
+        <result column="fiber" property="fiber"/>
+        <result column="sodium" property="sodium"/>
+        <result column="sugar" property="sugar"/>
+        <result column="vitamin_a" property="vitaminA"/>
+        <result column="vitamin_c" property="vitaminC"/>
+        <result column="calcium" property="calcium"/>
+        <result column="iron" property="iron"/>
+        <result column="image_url" property="imageUrl"/>
+        <result column="description" property="description"/>
+        <result column="is_verified" property="isVerified"/>
+        <result column="source" property="source"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, category, brand, barcode, unit, serving_size, calories, protein, 
+        carbohydrate, fat, fiber, sodium, sugar, vitamin_a, vitamin_c, calcium, iron,
+        image_url, description, is_verified, source, created_at, updated_at, is_deleted
+    </sql>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="findByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE name = #{name} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="findByBarcode" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE barcode = #{barcode} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="search" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE is_deleted = 0
+        <if test="dto.keyword != null and dto.keyword != ''">
+            AND name LIKE CONCAT('%', #{dto.keyword}, '%')
+        </if>
+        <if test="dto.category != null and dto.category != ''">
+            AND category = #{dto.category}
+        </if>
+        <if test="dto.barcode != null and dto.barcode != ''">
+            AND barcode = #{dto.barcode}
+        </if>
+        <if test="dto.isVerified != null">
+            AND is_verified = #{dto.isVerified}
+        </if>
+        ORDER BY is_verified DESC, created_at DESC
+        <if test="dto.pageNum != null and dto.pageSize != null">
+            LIMIT #{dto.pageSize} OFFSET #{dto.pageNum, jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM food
+        WHERE is_deleted = 0
+        <if test="dto.keyword != null and dto.keyword != ''">
+            AND name LIKE CONCAT('%', #{dto.keyword}, '%')
+        </if>
+        <if test="dto.category != null and dto.category != ''">
+            AND category = #{dto.category}
+        </if>
+        <if test="dto.barcode != null and dto.barcode != ''">
+            AND barcode = #{dto.barcode}
+        </if>
+        <if test="dto.isVerified != null">
+            AND is_verified = #{dto.isVerified}
+        </if>
+    </select>
+
+    <select id="findByCategory" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE category = #{category} AND is_deleted = 0
+        ORDER BY is_verified DESC, name
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM food
+        WHERE is_deleted = 0
+        ORDER BY created_at DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM food WHERE is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO food (
+            name, category, brand, barcode, unit, serving_size, calories, protein,
+            carbohydrate, fat, fiber, sodium, sugar, vitamin_a, vitamin_c, calcium, 
+            iron, image_url, description, is_verified, source
+        ) VALUES (
+            #{name}, #{category}, #{brand}, #{barcode}, #{unit}, #{servingSize}, #{calories}, #{protein},
+            #{carbohydrate}, #{fat}, #{fiber}, #{sodium}, #{sugar}, #{vitaminA}, #{vitaminC}, #{calcium},
+            #{iron}, #{imageUrl}, #{description}, #{isVerified}, #{source}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE food
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="brand != null">brand = #{brand},</if>
+            <if test="barcode != null">barcode = #{barcode},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="servingSize != null">serving_size = #{servingSize},</if>
+            <if test="calories != null">calories = #{calories},</if>
+            <if test="protein != null">protein = #{protein},</if>
+            <if test="carbohydrate != null">carbohydrate = #{carbohydrate},</if>
+            <if test="fat != null">fat = #{fat},</if>
+            <if test="fiber != null">fiber = #{fiber},</if>
+            <if test="sodium != null">sodium = #{sodium},</if>
+            <if test="sugar != null">sugar = #{sugar},</if>
+            <if test="vitaminA != null">vitamin_a = #{vitaminA},</if>
+            <if test="vitaminC != null">vitamin_c = #{vitaminC},</if>
+            <if test="calcium != null">calcium = #{calcium},</if>
+            <if test="iron != null">iron = #{iron},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="isVerified != null">is_verified = #{isVerified},</if>
+            <if test="source != null">source = #{source},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE food SET is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <insert id="batchInsert">
+        INSERT INTO food (
+            name, category, brand, barcode, unit, serving_size, calories, protein,
+            carbohydrate, fat, fiber, sodium, sugar, vitamin_a, vitamin_c, calcium,
+            iron, image_url, description, is_verified, source
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.name}, #{item.category}, #{item.brand}, #{item.barcode}, #{item.unit}, 
+                #{item.servingSize}, #{item.calories}, #{item.protein}, #{item.carbohydrate}, 
+                #{item.fat}, #{item.fiber}, #{item.sodium}, #{item.sugar}, #{item.vitaminA}, 
+                #{item.vitaminC}, #{item.calcium}, #{item.iron}, #{item.imageUrl}, 
+                #{item.description}, #{item.isVerified}, #{item.source}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

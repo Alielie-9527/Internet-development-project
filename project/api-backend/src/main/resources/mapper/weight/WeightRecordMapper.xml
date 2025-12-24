@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.health.agent.module.weight.mapper.WeightRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.health.agent.module.weight.entity.WeightRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="record_date" property="recordDate"/>
+        <result column="weight" property="weight"/>
+        <result column="bmi" property="bmi"/>
+        <result column="body_fat_rate" property="bodyFatRate"/>
+        <result column="muscle_mass" property="muscleMass"/>
+        <result column="bone_mass" property="boneMass"/>
+        <result column="water_rate" property="waterRate"/>
+        <result column="visceral_fat" property="visceralFat"/>
+        <result column="basal_metabolism" property="basalMetabolism"/>
+        <result column="notes" property="notes"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 插入体重记录 -->
+    <insert id="insert" parameterType="com.health.agent.module.weight.entity.WeightRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO weight_record (
+            user_id, record_date, weight, bmi,
+            body_fat_rate, muscle_mass, bone_mass, water_rate,
+            visceral_fat, basal_metabolism, notes,
+            created_at, updated_at
+        ) VALUES (
+            #{userId}, #{recordDate}, #{weight}, #{bmi},
+            #{bodyFatRate}, #{muscleMass}, #{boneMass}, #{waterRate},
+            #{visceralFat}, #{basalMetabolism}, #{notes},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM weight_record WHERE id = #{id}
+    </select>
+
+    <!-- 更新体重记录 -->
+    <update id="updateById" parameterType="com.health.agent.module.weight.entity.WeightRecord">
+        UPDATE weight_record
+        <set>
+            <if test="recordDate != null">record_date = #{recordDate},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="bmi != null">bmi = #{bmi},</if>
+            <if test="bodyFatRate != null">body_fat_rate = #{bodyFatRate},</if>
+            <if test="muscleMass != null">muscle_mass = #{muscleMass},</if>
+            <if test="boneMass != null">bone_mass = #{boneMass},</if>
+            <if test="waterRate != null">water_rate = #{waterRate},</if>
+            <if test="visceralFat != null">visceral_fat = #{visceralFat},</if>
+            <if test="basalMetabolism != null">basal_metabolism = #{basalMetabolism},</if>
+            <if test="notes != null">notes = #{notes},</if>
+            updated_at = #{updatedAt}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除 -->
+    <delete id="deleteById">
+        DELETE FROM weight_record WHERE id = #{id}
+    </delete>
+
+    <!-- 条件查询列表 -->
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM weight_record WHERE user_id = #{userId}
+        <if test="query.startDate != null">
+            AND record_date &gt;= #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND record_date &lt;= #{query.endDate}
+        </if>
+        ORDER BY record_date DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{(query.pageNum-1) * query.pageSize}
+        </if>
+    </select>
+
+    <!-- 查询用户最新的一条记录 -->
+    <select id="selectLatestByUser" resultMap="BaseResultMap">
+        SELECT * FROM weight_record WHERE user_id = #{userId} ORDER BY record_date DESC LIMIT 1
+    </select>
+
+    <!-- 查询用户指定日期的记录 -->
+    <select id="selectByUserAndDate" resultMap="BaseResultMap">
+        SELECT * FROM weight_record WHERE user_id = #{userId} AND record_date = #{recordDate} LIMIT 1
+    </select>
+
+    <!-- 查询用户日期范围内的记录 -->
+    <select id="selectByDateRange" resultMap="BaseResultMap">
+        SELECT * FROM weight_record 
+        WHERE user_id = #{userId} 
+        AND record_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY record_date ASC
+    </select>
+
+    <!-- 查询用户某日期之前最近的一条记录 -->
+    <select id="selectPreviousRecord" resultMap="BaseResultMap">
+        SELECT * FROM weight_record 
+        WHERE user_id = #{userId} 
+        AND record_date &lt; #{recordDate}
+        ORDER BY record_date DESC 
+        LIMIT 1
+    </select>
+
+    <!-- 统计用户记录总数 -->
+    <select id="countByUser" resultType="int">
+        SELECT COUNT(*) FROM weight_record WHERE user_id = #{userId}
+    </select>
+
+</mapper>

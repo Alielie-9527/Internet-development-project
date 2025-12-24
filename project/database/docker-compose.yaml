@@ -1,0 +1,66 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql8-nutrition
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123456
+      - MYSQL_DATABASE=nutrition_db
+      - MYSQL_USER=demo_user
+      - MYSQL_PASSWORD=demo_pass_123
+    ports:
+      - "3306:3306"
+    command: [
+      "--default-authentication-plugin=mysql_native_password",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+      "--init-connect=SET NAMES utf8mb4",
+      "--skip-character-set-client-handshake"
+    ]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - demo_network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: my-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes 
+    volumes:
+      - ./redis/data:/data 
+    networks:
+      - demo_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-demo
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_USER=demo_user
+      - PMA_PASSWORD=demo_pass_123
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - demo_network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  demo_network:
+    driver: bridge

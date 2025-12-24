@@ -1,0 +1,125 @@
+# ==================== 根级别 Docker Compose 配置 ====================
+# 一键启动整个项目：MySQL、Redis、后端、前端
+
+version: '3.8'
+
+services:
+  # ==================== MySQL 数据库 ====================
+  mysql:
+    image: mysql:8.0
+    container_name: health-agent-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-nutrition_db}
+      MYSQL_USER: ${DB_USER:-nutrition_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-nutrition123}
+      TZ: Asia/Shanghai
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./project/database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - health-agent-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==================== Redis 缓存 ====================
+  redis:
+    image: redis:7-alpine
+    container_name: health-agent-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - health-agent-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==================== PhpMyAdmin (可选，用于数据库管理) ====================
+  phpmyadmin:
+    image: phpmyadmin:5-apache
+    container_name: health-agent-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USER:-nutrition_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-nutrition123}
+      PMA_PORT: 3306
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - health-agent-network
+    restart: unless-stopped
+
+  # ==================== 后端 API ====================
+  backend:
+    build:
+      context: ./project/api-backend
+      dockerfile: Dockerfile
+    container_name: health-agent-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-nutrition_db}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-nutrition_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-nutrition123}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - health-agent-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ==================== 前端 (Nginx + Vue) ====================
+  frontend:
+    build:
+      context: ./project/h5-mobile
+      dockerfile: Dockerfile
+    container_name: health-agent-frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+    networks:
+      - health-agent-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    name: health-agent-mysql-data
+  redis_data:
+    name: health-agent-redis-data
+
+networks:
+  health-agent-network:
+    name: health-agent-network
+    driver: bridge

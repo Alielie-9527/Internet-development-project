@@ -1,0 +1,85 @@
+# ===== System Files =====
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.swo
+
+# ===== IDEs and Editors =====
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.factorypath
+.springBeans
+.sts4-cache
+
+# ===== Build and Dependencies =====
+node_modules/
+dist/
+dist-ssr/
+target/
+build/
+out/
+bin/
+coverage/
+.gradle/
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.toast
+.pytest_cache/
+.mypy_cache/
+.tox/
+.anaconda/
+.conda/
+
+# ===== Environment and Secrets =====
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+**/secrets.*
+# Keep example files
+!.env.example
+!application.example.yml
+
+# ===== Logs =====
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Database and Data =====
+database/redis/data/
+**/data/dump.rdb
+
+# ===== Project Specific (Based on project/.gitignore) =====
+docs/
+html/
+# If you want to ignore all markdown files as specified in project/.gitignore:
+# *.md
+# **/*.md
+# !README.md
+
+# Backend sensitive config
+api-backend/src/main/resources/application.yml
+**/application-local.yml
+**/application-*.local.yml

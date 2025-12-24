@@ -1,0 +1,38 @@
+# ==================== 后端 .dockerignore ====================
+# 避免将不必要的文件复制到 Docker 镜像中，加快构建速度和减少镜像大小
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 构建输出（但需要 target 中的 JAR）
+target/classes/
+target/test-classes/
+target/generated-sources/
+target/maven-archiver/
+target/maven-status/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Maven
+.m2/
+.mvn/
+mvnw
+mvnw.cmd
+
+# 文档和日志
+*.log
+*.md
+!README.md
+docs/
+
+# 其他
+*.tmp
+*.bak
