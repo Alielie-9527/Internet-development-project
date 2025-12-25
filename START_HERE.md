@@ -313,14 +313,6 @@ sudo certbot certonly --standalone -d yourdomain.com
 # 修改 Nginx 配置以支持 HTTPS（高级）
 ```
 
-### 配置防火墙
-```bash
-# 只允许特定端口
-sudo ufw allow 80/tcp      # HTTP
-sudo ufw allow 443/tcp     # HTTPS
-sudo ufw deny 3306/tcp     # MySQL（仅内部访问）
-sudo ufw deny 6379/tcp     # Redis（仅内部访问）
-```
 
 ## 🚀 部署到云服务器
 
